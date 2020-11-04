@@ -11,10 +11,10 @@ services:
         command: gunicorn django_demo.wsgi:application --bind 0.0.0.0:8000
         # データを永続化させる場合の設定。`host:container`でパスを記載
         volumes:
-            - ./app/:/usr/src/app/
+            - static_volume:/usr/src/app/staticfiles
         # 指定されたポートは接続されたサービスからアクセス可能
         expose:
-            - "8000"
+            - 8000
         # 環境変数を指定
         env_file: .env
         # 接続するサービスを指定
@@ -26,16 +26,19 @@ services:
         image: postgres:11.4-alpine
         # データベースの永続化
         volumes:
-           - postgres_data:/var/lib/postgresql/data
+            - postgres_data:/var/lib/postgresql/data
         env_file: .env.db
 
     nginx:
         build: ./nginx
+        volumes:
+            - static_volume:/usr/src/app/staticfiles
         ports:
-            - "1337:80"
+            - 1337:80
         depends_on:
             - django
 
 # トップレベルに書く「名前付きvolumes」は複数サービスから参照できる
 volumes:
-    postgres_data: 
+    postgres_data:
+    static_volume:
